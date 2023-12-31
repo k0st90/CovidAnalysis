@@ -1,3 +1,49 @@
+/*
+
+Queries used for Tableau Project will be marked with *
+
+*/
+
+-- Total deaths *
+Select location, SUM(new_deaths) as TotalDeathCount
+From PortfolioProject..CovidDeaths
+--Where location like '%states%'
+Where continent is null 
+and location not in ('World', 'European Union', 'International')
+Group by location
+order by TotalDeathCount desc
+
+-- Countries with highest Illness Rate in comparison to population *
+SELECT 
+Location, population, MAX(total_cases) HighestInfectionCount, MAX(CASE WHEN population != 0 THEN total_cases / population*100 ELSE NULL END) AS illness_rate
+FROM PortfolioProject..CovidDeaths
+WHERE continent is not NULL
+GROUP BY Location, population
+ORDER BY illness_rate desc
+
+-- Countries with highest Illness Rate in comparison to population with date*
+SELECT 
+Location, date, population, MAX(total_cases) HighestInfectionCount, MAX(CASE WHEN population != 0 THEN total_cases / population*100 ELSE NULL END) AS illness_rate
+FROM PortfolioProject..CovidDeaths
+WHERE continent is not NULL
+GROUP BY Location, population, date
+ORDER BY illness_rate desc
+
+--Global *
+SELECT 
+SUM(new_cases) AS total_cases, SUM(new_deaths) as total_deaths, CASE WHEN SUM(new_cases) != 0 THEN  SUM(new_deaths) / SUM(new_cases)*100 ELSE NULL END AS death_rate
+FROM PortfolioProject..CovidDeaths
+WHERE continent is not NULL
+ORDER BY 1, 2;
+
+
+
+======================================
+
+
+
+
+--Checking
 SELECT Location, date, total_cases, new_cases, total_deaths, population
 FROM PortfolioProject..CovidDeaths
 WHERE continent is not NULL
@@ -17,15 +63,6 @@ FROM PortfolioProject..CovidDeaths
 WHERE continent is not NULL
 ORDER BY 1, 2;
 
--- Countries with highest Illness Rate in comparison to population
-SELECT 
-Location, population, MAX(total_cases) HighestInfectionCount, MAX(CASE WHEN population != 0 THEN total_cases / population*100 ELSE NULL END) AS illness_rate
-FROM PortfolioProject..CovidDeaths
-WHERE continent is not NULL
-GROUP BY Location, population
-ORDER BY illness_rate desc
-
-
 --Countries with Highest Death Count per Population
 SELECT 
 Location, MAX(total_deaths) AS Total_deathsCount
@@ -34,7 +71,6 @@ WHERE continent is not NULL
 GROUP BY Location
 ORDER BY Total_deathsCount desc
 
-
 -- Continents with the highest deathCount
 SELECT 
 location, MAX(total_deaths) AS Total_deathsCount
@@ -42,14 +78,6 @@ FROM PortfolioProject..CovidDeaths
 WHERE continent is NULL
 GROUP BY location
 ORDER BY Total_deathsCount desc
-
---Global
-SELECT 
-date, SUM(new_cases) AS total_cases, SUM(new_deaths) as total_deaths, CASE WHEN SUM(new_cases) != 0 THEN  SUM(new_deaths) / SUM(new_cases)*100 ELSE NULL END AS death_rate
-FROM PortfolioProject..CovidDeaths
-WHERE continent is not NULL
-GROUP BY date
-ORDER BY 1, 2;
 
 -- Total Population vs Vaccinations
 WITH PvsV (continent, location, date, population, new_vaccinations, RollingPeopleVaccinated)
